@@ -19,7 +19,6 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/GetAll', async (req: Request, res: Response) => {
     const id = req.body.id;
     console.log("GetAll:", id);
-
     const categories = await prisma.category.findMany({ where: { userId: id } });
     const filterCategory = await Promise.all(categories.map(async (it) => {
         const filter = await prisma.filter.findMany({ where: { categoryId: it.id } });
