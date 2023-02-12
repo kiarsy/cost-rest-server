@@ -8,8 +8,8 @@ COPY ./src ./src
 COPY ./prisma ./prisma
 COPY tsconfig.json .
 RUN npm run build
-# Build production image
-FROM builder as runner
-COPY --from=builder /app/build ./build
+# # Build production image
+# FROM builder as runner
+# COPY --from=builder /app/build ./build
 EXPOSE 3000
 CMD npm run start

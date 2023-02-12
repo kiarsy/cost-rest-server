@@ -13,7 +13,7 @@ app.use(bodyParser.json())
 
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('Cost Server');
+    res.send('Cost REST Server');
 });
 
 app.get('/GetAll', async (req: Request, res: Response) => {
