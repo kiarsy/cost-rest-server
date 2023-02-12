@@ -1,0 +1,43 @@
+name: GCP Cloud Run
+on:
+  push:
+    branches:
+      - master
+      - develop
+env:
+  PROJECT_ID: sonic-cat-363104
+  IMAGE_NAME: cost-rest-api
+  RUN_REGION: us-central1
+  SERVICE_NAME: cost-rest-api
+jobs:
+  build:
+    name: Build Docker and deploy cloud run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@v1
+        with:
+            version: '416.0.0'
+            service_account_email: ${{ secrets.SA_EMAIL }}
+            service_account_key: ${{ secrets.GCP_SA_KEY_JSON}}
+
+      - id: 'auth'
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0
+        with: 
+          token_format: 'access_token'
+          credentials_json: '${{ secrets.GCP_SA_KEY_JSON }}'
+
+      # Build and push image to Google Container Registry
+      - name: Build
+        run: | 
+          gcloud config set project $PROJECT_ID
+          gcloud builds submit --tag gcr.io/$PROJECT_ID/$IMAGE_NAME:$GITHUB_SHA
+
+      - name: Deploy
+        run: gcloud run services update $SERVICE_NAME --image=gcr.io/$PROJECT_ID/$IMAGE_NAME:$GITHUB_SHA --region $RUN_REGION
+        # run: gcloud run deploy $PROJECT_ID --image gcr.io/$PROJECT_ID/$IMAGE_NAME:$GITHUB_SHA --platform managed --region $RUN_REGION
