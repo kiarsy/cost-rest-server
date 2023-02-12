@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Category, Cost, Filter, PrismaClient } from '@prisma/client';
 import express, { Express, Request, Response } from 'express';
 import bodyParser from 'body-parser'
 
@@ -20,7 +20,7 @@ app.get('/GetAll', async (req: Request, res: Response) => {
     const id = req.body.id;
     console.log("GetAll:", id);
     const categories = await prisma.category.findMany({ where: { userId: id } });
-    const filterCategory = await Promise.all(categories.map(async (it) => {
+    const filterCategory = await Promise.all(categories.map(async (it:Category) => {
         const filter = await prisma.filter.findMany({ where: { categoryId: it.id } });
         return {
             category: it,
@@ -30,12 +30,12 @@ app.get('/GetAll', async (req: Request, res: Response) => {
 
     const aggregate = await Promise.all(filterCategory.map(async (it) => {
 
-        const filterCost = await Promise.all(it.filters.map(async (filter) => {
+        const filterCost = await Promise.all(it.filters.map(async (filter:Filter) => {
             const costs = await prisma.cost.findMany({ where: { description: { contains: filter.matchText } } });
-            const totalDebit = costs.reduce((accumulator, curValue) => {
+            const totalDebit = costs.reduce((accumulator:number, curValue:Cost) => {
                 return accumulator + curValue.debit
             }, 0);
-            const totalCredit = costs.reduce((accumulator, curValue) => {
+            const totalCredit = costs.reduce((accumulator:number, curValue:Cost) => {
                 return accumulator + curValue.credit
             }, 0);
 
